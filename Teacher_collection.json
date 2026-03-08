@@ -1,0 +1,795 @@
+{
+  "info": {
+    "_postman_id": "7b9b1aab-9951-4fda-b5b3-d33a3a6b2ed8",
+    "name": "Teacher API Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38568115",
+    "_collection_link": "https://go.postman.co/collection/38568115-7b9b1aab-9951-4fda-b5b3-d33a3a6b2ed8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Auth token exists\", function () {\r",
+                  "    pm.expect(response.authToken).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "pm.environment.set(\"token\", response.authToken);\r",
+                  "pm.collectionVariables.set(\"token\", response.authToken);\r",
+                  "// let response = pm.response.json();\r",
+                  "// console.log(response);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"password123\"\r\n}\r\n"
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teacher CRUD",
+      "item": [
+        {
+          "name": "Create Teacher",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});\r",
+                  "\r",
+                  "let requestBody = JSON.parse(pm.request.body.raw);\r",
+                  " responseBody = pm.response.json();\r",
+                  "\r",
+                  "// teacherId validation\r",
+                  "pm.test(\"Teacher ID matches request\", function () {\r",
+                  "    pm.expect(responseBody.teacherId).to.eql(requestBody.teacherId);\r",
+                  "});\r",
+                  "\r",
+                  "// name validation\r",
+                  "pm.test(\"Name matches request\", function () {\r",
+                  "    pm.expect(responseBody.name).to.eql(requestBody.name);\r",
+                  "});\r",
+                  "\r",
+                  "// email validation\r",
+                  "pm.test(\"Email matches request\", function () {\r",
+                  "    pm.expect(responseBody.email).to.eql(requestBody.email);\r",
+                  "});\r",
+                  "\r",
+                  "// department validation\r",
+                  "pm.test(\"Department matches request\", function () {\r",
+                  "    pm.expect(responseBody.department).to.eql(requestBody.department);\r",
+                  "});\r",
+                  "\r",
+                  "// designation validation\r",
+                  "pm.test(\"Designation matches request\", function () {\r",
+                  "    pm.expect(responseBody.designation).to.eql(requestBody.designation);\r",
+                  "});\r",
+                  "\r",
+                  "// save teacherId for next APIs\r",
+                  "pm.environment.set(\"teacherId\", responseBody.teacherId);\r",
+                  "pm.collectionVariables.set(\"teacherId\", responseBody.teacherId);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "let teacherId = Math.floor(Math.random() * 10000);\r",
+                  "\r",
+                  "console.log(\"Generated TeacherId:\", teacherId);\r",
+                  "\r",
+                  "pm.collectionVariables.set(\"TeacherId\", teacherId);\r",
+                  "pm.environment.set(\"TeacherId\", teacherId);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Teacher {{$randomFirstName}}\",\r\n    \"email\": \"teacher{{$randomInt}}@mail.com\",\r\n    \"department\": \"CSE\",\r\n    \"teacherId\": {{TeacherId}},\r\n    \"designation\": \"Lecturer\"\r\n}\r\n "
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Teachers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1️⃣ Status code check\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "//  Schema validation \r",
+                  "pm.test(\"Validate teacher object schema\", function () {\r",
+                  "    const teachers = pm.response.json();\r",
+                  "    if (teachers.length > 0) {\r",
+                  "        const teacher = teachers[0];\r",
+                  "        pm.expect(teacher).to.have.property(\"name\").that.is.a(\"string\");\r",
+                  "        pm.expect(teacher).to.have.property(\"email\").that.is.a(\"string\");\r",
+                  "        pm.expect(teacher).to.have.property(\"department\").that.is.a(\"string\");\r",
+                  "        pm.expect(teacher).to.have.property(\"teacherId\").that.is.a(\"number\");\r",
+                  "        pm.expect(teacher).to.have.property(\"designation\").that.is.a(\"string\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "// 4️⃣ Check if created teacher exists in list\r",
+                  "pm.test(\"Created teacher exists in list\", function () {\r",
+                  "    const teachers = pm.response.json();\r",
+                  "    const teacherId = pm.environment.get(\"teacherId\");\r",
+                  "    const exists = teachers.some(t => t.teacherId == teacherId);\r",
+                  "    pm.expect(exists).to.be.true;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Teacher filter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Status 200\r",
+                  "pm.test(\"Status code is 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// Department filter \r",
+                  "pm.test(\"Department filter works\", () => {\r",
+                  "    const teachers = pm.response.json();\r",
+                  "    if(teachers.length > 0){\r",
+                  "        teachers.forEach(t => pm.expect(t.department).to.eql(\"CSE\"));\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "// Email filter \r",
+                  "pm.test(\"Email filter works\", () => {\r",
+                  "    const teachers = pm.response.json();\r",
+                  "    const email = pm.collectionVariables.get(\"teacherEmail\");\r",
+                  "    if(email){\r",
+                  "        const found = teachers.some(t => t.email == email);\r",
+                  "        pm.expect(found).to.be.true;\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher?email=teacher993@mail.com",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "email",
+                  "value": "teacher993@mail.com"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Teacher by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Status 200\r",
+                  "pm.test(\"Status code is 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Returned ID matches\r",
+                  "pm.test(\"Returned teacherId matches\", () => {\r",
+                  "    const teacher = pm.response.json();\r",
+                  "    const teacherId = pm.environment.get(\"teacherId\");\r",
+                  "    pm.expect(teacher.teacherId).to.eql(Number(teacherId));\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher/{{teacherId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher",
+                "{{teacherId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Teacher",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "if(pm.response.code === 200){\r",
+                  "    const teacher = pm.response.json();\r",
+                  "\r",
+                  "    pm.test(\"Fields updated correctly\", function () {\r",
+                  "        pm.expect(teacher.name).to.eql(\"Teacher Updated\");\r",
+                  "        pm.expect(teacher.email).to.eql(\"teacher225@mail.com\");\r",
+                  "        pm.expect(teacher.department).to.eql(\"CSE\");\r",
+                  "        pm.expect(teacher.designation).to.eql(\"Associate Professor\");\r",
+                  "    });\r",
+                  "} else {\r",
+                  "    console.log(\"PUT failed, response text:\", pm.response.text());\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Teacher Updated\",\r\n    \"email\": \"teacher225@mail.com\",\r\n    \"department\": \"CSE\",\r\n    \"designation\": \"Associate Professor\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher/{{teacherId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher",
+                "{{teacherId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Teacher",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1️⃣ Status code check\r",
+                  "pm.test(\"Status code is 200 or 204\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2️⃣ Validate delete message\r",
+                  "pm.test(\"Delete message is correct\", function () {\r",
+                  "    const res = pm.response.json();\r",
+                  "    pm.expect(res.message).to.eql(\"Teacher deleted successfully\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher/{{teacherId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher",
+                "{{teacherId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Wrong Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 or 400\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message exists\", function () {\r",
+                  "    const res = pm.response.json();\r",
+                  "    pm.expect(res.message || res.error).to.exist;\r",
+                  "    console.log(\"Error message:\", res.message || res.error);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"wrongpassword\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {\r",
+                  "    pm.expect(pm.response.code).to.eql(401);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text",
+                "disabled": true
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Teacher ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.expect(pm.response.code).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher/99999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher",
+                "99999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Required Field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.expect(pm.response.code).to.eql(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message exists\", function () {\r",
+                  "    const res = pm.response.json();\r",
+                  "    pm.expect(res.message || res.error).to.exist;\r",
+                  "    console.log(\"Error message:\", res.message || res.error);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"teacher999@mail.com\",\r\n    \"department\": \"CSE\",\r\n    \"teacherId\": 999,\r\n    \"designation\": \"Lecturer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}:5171/api/teacher",
+              "host": [
+                "{{base_url}}"
+              ],
+              "port": "5171",
+              "path": [
+                "api",
+                "teacher"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzcyOTc3MjU2LCJleHAiOjE3NzMwNjM2NTZ9.ttnJsKRSyOitCq0XD7mX3bFQ5KrKpvTu7baYjEU2cVI"
+    },
+    {
+      "key": "base_url",
+      "value": "http://54.255.195.111"
+    },
+    {
+      "key": "TeacherId",
+      "value": ""
+    },
+    {
+      "key": "teacherId",
+      "value": ""
+    }
+  ]
+}
