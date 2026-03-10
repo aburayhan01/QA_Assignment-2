@@ -152,8 +152,7 @@ Drive Link:
 
 The drive folder contains:
 
-* HTML Report Screenshot
+* Postman collection Screenshot
 * Project Video Recording
 
----
 
