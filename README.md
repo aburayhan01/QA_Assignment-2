@@ -134,21 +134,21 @@ Teacher API Testing.postman_collection.json
 
 ---
 
-## 📊 HTML Report Screenshot
+##  HTML Report Screenshot
 
 <img width="932" height="869" alt="Screenshot 2026-03-09 120255" src="https://github.com/user-attachments/assets/afedaf7c-bcdd-4bbe-ba6e-a2805609dd41" />
 
 
-## 🎥 Project Video
+##  Project Video
 
-A video recording of the full project execution is available in the Google Drive folder.
+[Video recording of the full project execution.](https://drive.google.com/file/d/108ry0HP8P7qokvDU7Ias3RhIuBPeQf63/view?usp=sharing)
 
 ---
 
-## 🔗 Google Drive Folder
+##  Google Drive Folder
 
 Drive Link:
-PASTE_YOUR_DRIVE_LINK_HERE
+[Video and screenshot link](https://drive.google.com/drive/folders/1N1vCoWI5DNvljqw_feZW0l2HlW4dSClr?usp=drive_link)
 
 The drive folder contains:
 
